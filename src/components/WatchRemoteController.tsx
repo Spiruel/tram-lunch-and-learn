@@ -18,6 +18,7 @@ export const WatchRemoteController: React.FC<WatchRemoteProps> = ({
 }) => {
   const [isActive, setIsActive] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [phoneConnected, setPhoneConnected] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Keep references to stepForward & stepBackward up to date in callbacks
@@ -27,6 +28,44 @@ export const WatchRemoteController: React.FC<WatchRemoteProps> = ({
     stepForwardRef.current = stepForward;
     stepBackwardRef.current = stepBackward;
   }, [stepForward, stepBackward]);
+
+  // Connect to local SSE remote bridge (receives clicks from paired phone / watch)
+  useEffect(() => {
+    let eventSource: EventSource | null = null;
+    try {
+      eventSource = new EventSource('/api/remote/events');
+      eventSource.onmessage = (e) => {
+        try {
+          const msg = JSON.parse(e.data);
+          if (msg.type === 'action') {
+            if (msg.action === 'next') stepForwardRef.current();
+            else if (msg.action === 'prev') stepBackwardRef.current();
+          } else if (msg.type === 'sync') {
+            setPhoneConnected(true);
+          }
+        } catch {}
+      };
+      eventSource.onerror = () => {
+        // SSE disconnected (e.g. static host)
+      };
+    } catch {}
+    return () => {
+      eventSource?.close();
+    };
+  }, []);
+
+  // Broadcast current slide metadata to the local bridge so phone/watch displays it
+  useEffect(() => {
+    fetch('/api/remote/state', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        index: slideIndex,
+        title: currentSlide.title.replace(/<[^>]*>/g, ''),
+        total: totalSlides,
+      }),
+    }).catch(() => {});
+  }, [slideIndex, currentSlide, totalSlides]);
 
   const updateMediaSession = useCallback(
     (slide: SlideSpec, idx: number) => {
@@ -209,39 +248,53 @@ export const WatchRemoteController: React.FC<WatchRemoteProps> = ({
             </div>
 
             <div className="watch-modal-body">
+              <div style={{ display: 'flex', gap: '20px', alignItems: 'center', background: '#fff8f3', padding: '16px', borderRadius: '14px', border: '1px solid #ebd9c8', marginBottom: '20px' }}>
+                <img 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(
+                    `http://${typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' ? window.location.hostname : '192.168.86.161'}:5188/remote`
+                  )}`}
+                  alt="Remote QR Code"
+                  style={{ width: '124px', height: '124px', borderRadius: '8px', background: '#fff', padding: '6px', border: '1px solid #ebd9c8' }}
+                />
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '16px', color: '#0f172a', marginBottom: '4px' }}>
+                    Scan with Your Phone (Paired to Watch)
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '8px', lineHeight: 1.4 }}>
+                    Opens the local presentation bridge at{' '}
+                    <strong style={{ color: '#0284c7' }}>
+                      http://{typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' ? window.location.hostname : '192.168.86.161'}:5188/remote
+                    </strong>
+                  </div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', fontWeight: 600, color: phoneConnected ? '#0d9488' : '#7c2d12' }}>
+                    <span>{phoneConnected ? '🟢' : '🟡'}</span>
+                    <span>{phoneConnected ? 'Phone Bridge Connected' : 'Ready for Phone Scan'}</span>
+                  </div>
+                </div>
+              </div>
+
               <div className="watch-guide-section">
-                <h4>Method 1: Zero-Install Double-Pinch (Media Controls)</h4>
+                <h4>Option 1: Phone WiFi Bridge (For Pixel Watch Double-Pinch)</h4>
                 <p>
-                  Uses the web-standard <strong>HTML5 MediaSession API</strong> with a silent background audio loop. No custom apps needed!
+                  Since your Pixel Watch is paired via Bluetooth to your Android phone, the phone acts as the instant WiFi bridge to your Mac:
                 </p>
                 <ol>
-                  <li>
-                    Click <strong>“Watch Clicker”</strong> (or press <strong>W</strong>) to turn it on.
-                  </li>
-                  <li>
-                    Ensure your presentation is open in Chrome on your phone, laptop, or projector device.
-                  </li>
-                  <li>
-                    Your Pixel Watch will show the active media card (with the current slide title and number).
-                  </li>
-                  <li>
-                    <strong>Double-pinch your thumb and index finger together</strong>. The watch sends a play/pause toggle, which advances the presentation forward!
-                  </li>
-                  <li>
-                    You can also tap the <strong>Next ⏭</strong> or <strong>Previous ⏮</strong> buttons right on the watch screen.
-                  </li>
+                  <li>Scan the QR code above with your phone camera, or navigate to <code>/remote</code>.</li>
+                  <li>Tap the screen once to enable the silent audio session.</li>
+                  <li><strong>Double-pinch your thumb and index finger together on your Pixel Watch</strong>. The watch triggers play/pause, which instantly steps the presentation forward on your Mac!</li>
+                  <li>You also get large tactile NEXT / PREV buttons and live slide tracking on your phone screen.</li>
                 </ol>
               </div>
 
               <div className="watch-guide-section">
-                <h4>Method 2: Direct Bluetooth HID (WowMouse Presenter)</h4>
+                <h4>Option 2: Direct Bluetooth HID (No Phone Needed)</h4>
                 <p>
-                  If your laptop is connected directly to a HDMI projector and your watch is paired via Bluetooth directly to the laptop:
+                  If you want your watch to pair directly to your Mac as a physical presentation clicker:
                 </p>
                 <ul>
-                  <li>Install <strong>WowMouse Presenter</strong> (by Doublepoint) from Google Play on your Pixel Watch.</li>
-                  <li>Pair your Pixel Watch to your Mac/PC laptop via normal Bluetooth settings.</li>
-                  <li>Open WowMouse on the watch. Double-pinching acts as a physical Bluetooth clicker (sends ArrowRight), advancing the slides seamlessly!</li>
+                  <li>Install <strong>WowMouse Presenter</strong> or <strong>Wear Presentation Remote</strong> from Google Play on your Pixel Watch.</li>
+                  <li>On your Mac, open <strong>System Settings ➔ Bluetooth</strong> and pair directly with the watch.</li>
+                  <li>The watch acts as a physical Bluetooth keyboard (sending <code>ArrowRight</code> / <code>Space</code>) directly to your Mac without needing WiFi.</li>
                 </ul>
               </div>
             </div>
