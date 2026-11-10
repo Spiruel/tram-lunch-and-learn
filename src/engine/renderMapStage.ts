@@ -1,5 +1,6 @@
 import { CityData, GeoShape, OverviewData, RouteInfo } from '../types';
 import { clamp, olmoEase, smoothstep, ViewportTransform } from './math';
+import { drawFtSourceFootnote } from './renderChartsStage';
 
 export interface MapRenderParams {
   ctx: CanvasRenderingContext2D;
@@ -829,10 +830,10 @@ function renderBirminghamSmallCity(
   // ========================================================================
   // 1. LEFT CARD: TOM FORTH'S "BIRMINGHAM IS A SMALL CITY" CHART
   // ========================================================================
-  slideCard(ctx, chartX, stageY, chartW, stageH, '#ffffff', 20);
+  slideCard(ctx, chartX, stageY, chartW, stageH, '#fff2e8', 20);
 
   ctx.save();
-  ctx.strokeStyle = '#e2e8f0';
+  ctx.strokeStyle = '#ebd9c8';
   ctx.lineWidth = 1.2;
   ctx.beginPath();
   ctx.roundRect(chartX, stageY, chartW, stageH, 20);
@@ -845,7 +846,7 @@ function renderBirminghamSmallCity(
   ctx.font = `700 ${isCompact ? 15 : 18}px "Plus Jakarta Sans", sans-serif`;
   ctx.fillText('“Birmingham isn’t a big city at peak times”', chartX + 24, stageY + 18);
 
-  ctx.fillStyle = '#64748b';
+  ctx.fillStyle = '#7c2d12';
   ctx.font = `500 ${isCompact ? 11 : 12.5}px "Plus Jakarta Sans", sans-serif`;
   ctx.fillText(
     'Tom Forth (2019) · GDP/capita vs city population (France vs UK non-capital cities)',
@@ -858,22 +859,27 @@ function renderBirminghamSmallCity(
   ctx.font = `600 ${isCompact ? 10.5 : 11.5}px "Plus Jakarta Sans", sans-serif`;
   ctx.textBaseline = 'middle';
 
-  // France
-  ctx.strokeStyle = '#2563eb';
+  // France (FT Blue)
+  ctx.strokeStyle = '#0284c7';
   ctx.fillStyle = 'rgba(219, 234, 254, 0.7)';
   ctx.lineWidth = 1.6;
   ctx.beginPath();
   ctx.arc(chartX + 30, legY, 5, 0, Math.PI * 2);
   ctx.fill();
   ctx.stroke();
-  ctx.fillStyle = '#1e40af';
+  ctx.fillStyle = '#0284c7';
   ctx.fillText('France (non-capital)', chartX + 42, legY);
 
-  // UK
+  // UK (FT Red)
   const leg2X = chartX + (isCompact ? 165 : 185);
-  ctx.fillStyle = '#059669';
-  ctx.fillRect(leg2X, legY - 4.5, 9, 9);
-  ctx.fillStyle = '#065f46';
+  ctx.fillStyle = '#ffd5e1';
+  ctx.strokeStyle = '#e11d48';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(leg2X + 6, legY, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#e11d48';
   ctx.fillText('UK (non-capital)', leg2X + 16, legY);
 
   // Birmingham
@@ -1087,9 +1093,9 @@ function renderBirminghamSmallCity(
   ctx.restore();
 
   // Bottom Takeaway Ribbon
-  const ribH = isCompact ? 30 : 34;
-  const ribY = stageY + stageH - ribH - 12;
-  ctx.fillStyle = '#fef2f2';
+  const ribH = isCompact ? 28 : 32;
+  const ribY = stageY + stageH - ribH - 30;
+  ctx.fillStyle = '#fee2e2';
   ctx.beginPath();
   ctx.roundRect(chartX + 16, ribY, chartW - 32, ribH, 8);
   ctx.fill();
@@ -1098,14 +1104,16 @@ function renderBirminghamSmallCity(
   ctx.stroke();
 
   ctx.fillStyle = '#991b1b';
-  ctx.font = `600 ${isCompact ? 10 : 11.5}px "Plus Jakarta Sans", sans-serif`;
+  ctx.font = `600 ${isCompact ? 9.5 : 11}px "Plus Jakarta Sans", sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(
-    '★ Productivity gap drops 33% → 9%: Birmingham is not unproductive; it is simply an effective city of 900k at peak times.',
+    '★ Productivity gap drops 33% → 9%: Birmingham is an effective city of only 900k at morning peak.',
     chartX + chartW * 0.5,
     ribY + ribH * 0.5
   );
+
+  drawFtSourceFootnote(ctx, chartX + 20, stageY + stageH - 12, 'Source: Tom Forth (2019) · Insee & ONS microdata');
   ctx.restore();
 
   // If compact, only show chart
@@ -1114,10 +1122,10 @@ function renderBirminghamSmallCity(
   // ========================================================================
   // 2. RIGHT CARD: SPATIAL PUBLIC TRANSIT CATCHMENT
   // ========================================================================
-  slideCard(ctx, mapX, stageY, mapW, stageH, '#f8fafc', 20);
+  slideCard(ctx, mapX, stageY, mapW, stageH, '#fff2e8', 20);
 
   ctx.save();
-  ctx.strokeStyle = '#e2e8f0';
+  ctx.strokeStyle = '#ebd9c8';
   ctx.lineWidth = 1.2;
   ctx.beginPath();
   ctx.roundRect(mapX, stageY, mapW, stageH, 20);
@@ -1130,7 +1138,7 @@ function renderBirminghamSmallCity(
   ctx.font = '700 16px "Plus Jakarta Sans", sans-serif';
   ctx.fillText('Spatial Public Transit Reach', mapX + 20, stageY + 18);
 
-  ctx.fillStyle = '#64748b';
+  ctx.fillStyle = '#7c2d12';
   ctx.font = '500 12px "Plus Jakarta Sans", sans-serif';
   ctx.fillText('30-min peak reach vs 30km metro ring', mapX + 20, stageY + 40);
 
@@ -1247,20 +1255,22 @@ function renderBirminghamSmallCity(
   // Summary at bottom of right card
   const botCardY = stageY + stageH - 52;
   ctx.fillStyle = '#0f766e';
-  ctx.font = '600 11.5px "Plus Jakarta Sans", sans-serif';
+  ctx.font = '700 11.5px "Plus Jakarta Sans", sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText(
     'Peak bus congestion cuts labour catchment by 75%',
     cardCx,
     botCardY
   );
-  ctx.fillStyle = '#64748b';
-  ctx.font = '400 10.5px "Plus Jakarta Sans", sans-serif';
+  ctx.fillStyle = '#7c2d12';
+  ctx.font = '500 11px "Plus Jakarta Sans", sans-serif';
   ctx.fillText(
     'giving Birmingham an effective population of only 900,000.',
     cardCx,
     botCardY + 16
   );
+
+  drawFtSourceFootnote(ctx, mapX + 20, stageY + stageH - 12, 'Source: 2026 GTFS Multi-Modal Network Matrix');
   ctx.restore();
 }
 
