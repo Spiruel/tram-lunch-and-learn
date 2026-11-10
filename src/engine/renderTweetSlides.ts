@@ -495,36 +495,37 @@ export function renderTalkOutline(ctx: CanvasRenderingContext2D, vt: ViewportTra
   const big = Math.min(rowH * 0.40, 36);
   const small = Math.min(rowH * 0.22, 17);
 
+  // FT Paper Card Backdrop
   ctx.save();
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = '#fff2e8';
   ctx.shadowColor = 'rgba(15, 23, 42, 0.08)';
   ctx.shadowBlur = 24;
   ctx.shadowOffsetY = 8;
   ctx.beginPath();
-  ctx.roundRect(panelX, stageY, panelW, stageH, 22);
+  ctx.roundRect(panelX, stageY, panelW, stageH, 20);
   ctx.fill();
   ctx.restore();
 
   ctx.save();
-  ctx.strokeStyle = '#e2e8f0';
+  ctx.strokeStyle = '#ebd9c8';
   ctx.lineWidth = 1.2;
   ctx.beginPath();
-  ctx.roundRect(panelX, stageY, panelW, stageH, 22);
+  ctx.roundRect(panelX, stageY, panelW, stageH, 20);
   ctx.stroke();
 
   // Top Roadmap Header
   const x0 = panelX + 44;
   ctx.font = '700 12px "JetBrains Mono", monospace';
-  ctx.fillStyle = '#7c3aed';
+  ctx.fillStyle = '#7c2d12';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
   ctx.fillText('TALK ROADMAP · 6 CHAPTERS', x0, stageY + 28);
 
-  ctx.font = `600 22px ${FONT}`;
-  ctx.fillStyle = INK;
+  ctx.font = `700 23px ${FONT}`;
+  ctx.fillStyle = '#0f172a';
   ctx.fillText('From the British Productivity Puzzle to Recovered Transit Networks', x0, stageY + 48);
 
-  ctx.strokeStyle = '#e2e8f0';
+  ctx.strokeStyle = '#ebd9c8';
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(x0, stageY + padTop + headerH);
@@ -537,7 +538,7 @@ export function renderTalkOutline(ctx: CanvasRenderingContext2D, vt: ViewportTra
     const y = startY + i * rowH;
 
     if (i < OUTLINE.length - 1) {
-      ctx.strokeStyle = 'rgba(226, 232, 240, 0.7)';
+      ctx.strokeStyle = 'rgba(235, 217, 200, 0.8)';
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(x0, y + rowH);
@@ -545,19 +546,31 @@ export function renderTalkOutline(ctx: CanvasRenderingContext2D, vt: ViewportTra
       ctx.stroke();
     }
 
-    ctx.fillStyle = '#7c3aed';
-    ctx.font = `600 ${big}px "JetBrains Mono", monospace`;
+    ctx.fillStyle = '#0284c7';
+    ctx.font = `700 ${big}px "JetBrains Mono", monospace`;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     ctx.fillText(String(i + 1).padStart(2, '0'), x0, y + rowH / 2);
 
     const tx = x0 + big * 2.3;
-    ctx.fillStyle = INK;
-    ctx.font = `600 ${big * 0.72}px ${FONT}`;
+    ctx.fillStyle = '#0f172a';
+    ctx.font = `700 ${big * 0.72}px ${FONT}`;
     ctx.fillText(head, tx, y + rowH / 2 - small * 0.65);
-    ctx.fillStyle = GREY;
+    ctx.fillStyle = '#475569';
     ctx.font = `400 ${small}px ${FONT}`;
     ctx.fillText(sub, tx, y + rowH / 2 + big * 0.45);
   });
+
+  // FT Source Footnote
+  ctx.font = '400 11.5px "Plus Jakarta Sans", sans-serif';
+  ctx.fillStyle = '#64748b';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText('Source: 6-Chapter Presentation Structure', x0, stageY + stageH - 12);
+  const tw = ctx.measureText('Source: 6-Chapter Presentation Structure').width;
+  ctx.font = '600 11.5px "Plus Jakarta Sans", sans-serif';
+  ctx.fillStyle = '#475569';
+  ctx.fillText(' · © FT', x0 + tw, stageY + stageH - 12);
+
   ctx.restore();
 }

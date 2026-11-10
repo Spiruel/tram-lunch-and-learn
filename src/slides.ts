@@ -995,9 +995,9 @@ const EXTRA_SLIDES: SlideSpec[] = [
 
 // Presentation order. Slides not listed here (e.g. the old 'cover') stay defined above but are not shown.
 const ORDER: string[] = [
-  // 1 · The puzzle
-  'most-important-graph',
+  // 1 · Talk Outline & The Puzzle
   'talk-outline',
+  'most-important-graph',
   // 2 · Effective city size
   'birmingham-small-city',
   'agglomeration-theory',
