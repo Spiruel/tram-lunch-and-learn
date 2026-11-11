@@ -16,7 +16,11 @@ export const WatchRemoteController: React.FC<WatchRemoteProps> = ({
   stepForward,
   stepBackward,
 }) => {
-  const [isActive, setIsActive] = useState<boolean>(false);
+  const localNetworkIp = '192.168.1.142';
+  const resolvedHost = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+    ? window.location.hostname
+    : localNetworkIp;
+  const remoteUrl = `http://${resolvedHost}:5188/remote`;
   const [showModal, setShowModal] = useState<boolean>(false);
   const [phoneConnected, setPhoneConnected] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -250,9 +254,7 @@ export const WatchRemoteController: React.FC<WatchRemoteProps> = ({
             <div className="watch-modal-body">
               <div style={{ display: 'flex', gap: '20px', alignItems: 'center', background: '#fff8f3', padding: '16px', borderRadius: '14px', border: '1px solid #ebd9c8', marginBottom: '20px' }}>
                 <img 
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(
-                    `http://${typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' ? window.location.hostname : '192.168.86.161'}:5188/remote`
-                  )}`}
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(remoteUrl)}`}
                   alt="Remote QR Code"
                   style={{ width: '124px', height: '124px', borderRadius: '8px', background: '#fff', padding: '6px', border: '1px solid #ebd9c8' }}
                 />
@@ -263,7 +265,7 @@ export const WatchRemoteController: React.FC<WatchRemoteProps> = ({
                   <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '8px', lineHeight: 1.4 }}>
                     Opens the local presentation bridge at{' '}
                     <strong style={{ color: '#0284c7' }}>
-                      http://{typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' ? window.location.hostname : '192.168.86.161'}:5188/remote
+                      {remoteUrl}
                     </strong>
                   </div>
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', fontWeight: 600, color: phoneConnected ? '#0d9488' : '#7c2d12' }}>
