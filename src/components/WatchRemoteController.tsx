@@ -16,11 +16,14 @@ export const WatchRemoteController: React.FC<WatchRemoteProps> = ({
   stepForward,
   stepBackward,
 }) => {
+  const ngrokUrl = 'https://d545-193-178-112-122.ngrok-free.app/remote';
   const localNetworkIp = '192.168.1.142';
   const resolvedHost = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
     ? window.location.hostname
     : localNetworkIp;
-  const remoteUrl = `http://${resolvedHost}:5188/remote`;
+  const localRemoteUrl = `http://${resolvedHost}:5188/remote`;
+  // Default to the secure public tunnel URL to bypass router AP client isolation
+  const remoteUrl = ngrokUrl;
   const [isActive, setIsActive] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [phoneConnected, setPhoneConnected] = useState<boolean>(false);
