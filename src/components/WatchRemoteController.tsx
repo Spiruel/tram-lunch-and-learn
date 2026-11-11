@@ -21,6 +21,7 @@ export const WatchRemoteController: React.FC<WatchRemoteProps> = ({
     ? window.location.hostname
     : localNetworkIp;
   const remoteUrl = `http://${resolvedHost}:5188/remote`;
+  const [isActive, setIsActive] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [phoneConnected, setPhoneConnected] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
